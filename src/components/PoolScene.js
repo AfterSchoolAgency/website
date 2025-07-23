@@ -107,6 +107,8 @@ export default function PoolScene() {
 
     console.log("Scene ready for new animation sequence.");
 
+    gsap.set('.floaty-letter', { autoAlpha: 0 }); // Hide floaties in the pool initially
+
     const tl = gsap.timeline({
       onComplete: () => {
         console.log("Main animation sequence complete. Ready for end state.");
@@ -133,68 +135,51 @@ export default function PoolScene() {
     // Create a separate timeline for each kid's journey
     kidDataWithSvgs.forEach((kid, index) => {
       const kidSelector = `#${kid.id}`;
+
       const kidTl = gsap.timeline();
 
       // This timeline handles a single kid's full journey
-      kidTl.to(kidSelector, { // Run up
+      kidTl.to(kidSelector, { // 1. Run up
         motionPath: {
           path: '#runUpPath',
           align: '#runUpPath',
           alignOrigin: [0.5, 0.5],
-          autoRotate: false,
+          autoRotate: false, // Keep them upright
         },
         duration: 8,
         ease: 'power1.inOut',
-        onStart: () => gsap.set(kidSelector, { opacity: 1 }),
+        onStart: () => gsap.set(kidSelector, { opacity: 1 }), // Show kid
       })
-      .to(kidSelector, { duration: 0.5 }) // Hesitate
-      .to(kidSelector, { // Slide down
+      .to(kidSelector, { duration: 0.5 }) // 2. Hesitate at the top
+      .to(kidSelector, { // 3. Slide down
         motionPath: {
           path: '#slideDownPath',
           align: '#slideDownPath',
           alignOrigin: [0.5, 0.5],
-          autoRotate: false,
+          autoRotate: true,
+          ease: 'power1.in',
         },
-        duration: 2,
-        ease: 'power1.in',
         onComplete: () => {
-          gsap.to(kidSelector, { opacity: 0, duration: 0.2 });
-          const floatyId = `floaty-${index}`;
-          // The floatyElement is now inside the pool container
-          const floatyElement = sceneRef.current.querySelector(`.pool-container #${floatyId}`);
-          if (floatyElement) {
-            const finalPos = FLOATY_FINAL_POSITIONS[index];
-            gsap.timeline()
-              .set(floatyElement, { 
-                opacity: 1, 
-                visibility: 'visible', 
-                display: 'block', 
-                x: finalPos.x, 
-                y: finalPos.y - 50, 
-                scale: 0.6, 
-                rotation: finalPos.rotation 
-              })
-              .to(floatyElement, { 
-                x: finalPos.x + (Math.random() * 40 - 20),
-                y: finalPos.y - (Math.random() * 20 + 20),
-                duration: 1.5, 
-                ease: 'power1.out',
-              })
-              .to(floatyElement, { 
-                x: finalPos.x,
-                y: finalPos.y, 
-                duration: 0.8, 
-                ease: 'bounce.out', 
-                onComplete: () => {
-                  gsap.to(floatyElement, { y: `+=${Math.random() * 10 + 5}`, repeat: -1, yoyo: true, duration: Math.random() * 2 + 3, ease: 'sine.inOut' });
-                }
-              });
-          }
+          gsap.to(kidSelector, { opacity: 0, duration: 0.1 }); // Kid disappears on splash
+          console.log(`${kid.id} splashed!`);
+
+          // 4. Floaty appears in the pool with a splash effect
+          const floatyInPoolEl = sceneRef.current.querySelector(`#floaty-${index}`);
+          gsap.fromTo(floatyInPoolEl, 
+            { autoAlpha: 0, scale: 0.3, y: '+=30' },
+            { 
+              autoAlpha: 1, 
+              scale: 1,
+              y: '-=10', // Pop up
+              duration: 0.8, 
+              ease: 'elastic.out(1, 0.75)',
+            }
+          );
         }
-      });
+      }, '>-0.5'); // Overlap slide start with hesitation end
 
       // Add each kid's personal timeline to the main timeline, staggered
-      tl.add(kidTl, `kidsParadeStarts+=${index * 0.2}`);
+      tl.add(kidTl, `kidsParadeStarts+=${index * 0.4}`); // Stagger kid entries
     });
 
     const floatyElements = gsap.utils.toArray('.floaty-wrapper');
