@@ -1,0 +1,19 @@
+<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .kid-silhouette { fill: black; }
+  </style>
+  <g class="kid-silhouette">
+    <!-- Head with afro puff hairstyle -->
+    <circle cx="50" cy="20" r="15"/>
+    <circle cx="65" cy="15" r="10"/>
+    <circle cx="35" cy="15" r="10"/>
+    <!-- Torso -->
+    <path d="M50,35 L50,75 Q50,85 40,85 L60,85 Q50,85 50,75"/>
+    <!-- Running Legs -->
+    <path d="M50,75 L65,95 L85,85" stroke="black" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <path d="M50,75 L35,100 L20,80" stroke="black" stroke-width="12" stroke-linecap="round" fill="none"/>
+    <!-- Arms -->
+    <path d="M50,45 L70,60" stroke="black" stroke-width="10" stroke-linecap="round" fill="none"/>
+    <path d="M50,45 L30,55" stroke="black" stroke-width="10" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>
