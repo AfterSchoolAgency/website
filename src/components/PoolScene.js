@@ -39,17 +39,17 @@ const KID_DATA = [
 
 // Final positions for floaties, relative to the pool container
 const FLOATY_FINAL_POSITIONS = [
-  { x: 140, y: 160, rotation: -15 }, // A
-  { x: 180, y: 160, rotation: 10 },  // F
-  { x: 220, y: 155, rotation: -5 },   // T
-  { x: 280, y: 165, rotation: 15 },  // E
-  { x: 340, y: 150, rotation: -10 }, // R
-  { x: 420, y: 160, rotation: 5 },   // S
-  { x: 480, y: 155, rotation: -15 }, // C
-  { x: 540, y: 165, rotation: 10 },  // H
-  { x: 600, y: 150, rotation: -5 },  // O
-  { x: 660, y: 160, rotation: 15 },  // O
-  { x: 720, y: 155, rotation: -10 }, // L
+  { x: 120, y: 130, rotation: -20 }, // A
+  { x: 180, y: 155, rotation: 15 },  // F
+  { x: 240, y: 125, rotation: -10 }, // T
+  { x: 300, y: 165, rotation: 25 },  // E
+  { x: 360, y: 140, rotation: -5 },  // R
+  { x: 430, y: 170, rotation: 10 },  // S
+  { x: 490, y: 135, rotation: -18 }, // C
+  { x: 550, y: 160, rotation: 20 },  // H
+  { x: 610, y: 120, rotation: -12 }, // O
+  { x: 670, y: 150, rotation: 8 },   // O
+  { x: 730, y: 130, rotation: 30 },  // L
 ];
 
 // A simple floaty component for now
