@@ -40,3 +40,35 @@ a {
     color-scheme: dark;
   }
 }
+
+/* Info Panel Styles */
+.info-icon-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.info-panel {
+  position: fixed;
+  top: 0;
+  right: -300px; /* Start off-screen */
+  width: 280px;
+  height: 100%;
+  background: var(--background, #ffffff);
+  color: var(--foreground, #171717);
+  padding: 60px 20px 20px 20px;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  transition: right 0.4s ease-in-out;
+  z-index: 999;
+}
+
+.info-panel.open {
+  right: 0; /* Slide in */
+}
+
+.info-panel p {
+  font-size: 16px;
+  line-height: 1.6;
+}
