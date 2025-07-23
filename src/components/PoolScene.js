@@ -330,7 +330,7 @@ export default function PoolScene() {
   }, [kidDataWithSvgs]); // Rerun if kid data changes
 
   return (
-    <div ref={sceneRef} style={{ position: "relative", width: 1100, height: 600, border: '1px solid #ccc' }}>
+        <div ref={sceneRef} className="scene-container">
       {/* 'A' is positioned centrally */}
       <div style={{ position: "absolute", left: '50%', top: '40%', transform: 'translate(-50%, -50%)', zIndex: 2 }}>
         <img src="/LOGO.svg" alt="A logo" style={{ width: '300px', height: 'auto' }} />
