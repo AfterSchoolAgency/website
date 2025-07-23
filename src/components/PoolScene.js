@@ -90,6 +90,7 @@ export default function PoolScene() {
   const sceneRef = useRef(null);
   const [kidDataWithSvgs, setKidDataWithSvgs] = useState([]);
   const [pushHandler, setPushHandler] = useState(() => () => {});
+  const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 }); // Initialize mouse off-screen
 
   useEffect(() => {
     // Assign random SVGs on the client-side only to prevent hydration mismatch
@@ -233,9 +234,23 @@ export default function PoolScene() {
     setPushHandler(() => handleFloatyPush);
 
     const physicsTick = () => {
+      const pushRadius = 100; // The "ripple" radius around the mouse
+      const pushStrength = 1.5;
       floatyData.forEach((p1, i) => {
         // Ambient float
         p1.vx += (Math.random() - 0.5) * 0.05;
+
+        // Mouse interaction (wide push)
+        const dxMouse = p1.x - mousePos.x;
+        const dyMouse = p1.y - mousePos.y;
+        const distMouseSq = dxMouse * dxMouse + dyMouse * dyMouse;
+
+        if (distMouseSq < pushRadius * pushRadius) {
+            const distMouse = Math.sqrt(distMouseSq);
+            const force = 1 - (distMouse / pushRadius); // Force is stronger when closer
+            p1.vx += (dxMouse / distMouse) * force * pushStrength;
+            p1.vy += (dyMouse / distMouse) * force * pushStrength;
+        }
         p1.vy += (Math.random() - 0.5) * 0.05;
 
         // Friction
@@ -318,10 +333,18 @@ export default function PoolScene() {
     <div ref={sceneRef} style={{ position: "relative", width: 1100, height: 600, border: '1px solid #ccc' }}>
       {/* 'A' is positioned centrally */}
       <div style={{ position: "absolute", left: '50%', top: '40%', transform: 'translate(-50%, -50%)', zIndex: 2 }}>
-        <img src="/logo.svg" alt="A logo" style={{ width: '300px', height: 'auto' }} />
+        <img src="/LOGO.svg" alt="A logo" style={{ width: '300px', height: 'auto' }} />
       </div>
       
-      <div className="pool-container" style={{ position: 'absolute', bottom: '20px', left: '75%', transform: 'translateX(-50%) rotate(-5deg)', zIndex: 10 }}>
+      <div 
+        className="pool-container" 
+        style={{ position: 'absolute', bottom: '20px', left: '75%', transform: 'translateX(-50%) rotate(-5deg)', zIndex: 10 }}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        }}
+        onMouseLeave={() => setMousePos({ x: -1000, y: -1000 })}
+      >
         <div style={{ position: 'relative', width: '1000px', height: '300px' }}>
           {POOL_SVG}
           {/* Floaty letters are now positioned relative to THIS container */}
