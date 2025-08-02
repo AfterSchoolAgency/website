@@ -31,7 +31,7 @@ export default function UnrollMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Prevent background scroll
+  // Prevent background scroll when open
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -39,48 +39,39 @@ export default function UnrollMenu() {
 
   return (
     <div ref={containerRef}>
-      {/* Trigger button: unroll the graphic element */}
-      <div
-        className="fixed top-6 left-6 z-50 overflow-hidden origin-left"
-        style={{
-          transform: open ? 'scaleX(1)' : 'scaleX(0)',
-          transition: 'transform 1s ease-in-out',
-        }}
+      {/* Static trigger button */}
+      <button
+        className="fixed top-6 left-6 z-50 focus:outline-none"
+        onClick={() => setOpen(true)}
+        aria-label="Open menu"
       >
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Open menu"
-          className="focus:outline-none"
-        >
-          <Image
-            src="/GRAPHIC ELEMENT.svg"
-            alt="Graphic Element"
-            width={200}
-            height={60}
-            priority
-          />
-        </button>
-      </div>
+        <Image
+          src="/GRAPHIC ELEMENT.svg"
+          alt="Graphic Element"
+          width={200}
+          height={60}
+          priority
+        />
+      </button>
 
-      {/* Full-screen overlay with unroll reveal */}
+      {/* Sliding overlay */}
       <div
-        className="fixed inset-0 bg-white z-40 origin-left"
+        className="fixed inset-0 bg-white z-40 transform transition-transform duration-1000 ease-in-out"
         style={{
-          transform: open ? 'scaleX(1)' : 'scaleX(0)',
-          transition: 'transform 1s ease-in-out',
+          transform: open ? 'translateX(0%)' : 'translateX(-100%)',
           pointerEvents: open ? 'auto' : 'none',
         }}
       >
         {/* Close button */}
         <button
+          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
           onClick={() => setOpen(false)}
           aria-label="Close menu"
-          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
         >
           &times;
         </button>
 
-        {/* Logo inside overlay */}
+        {/* Logo in overlay header */}
         <div className="absolute top-6 left-6">
           <Image
             src="/GRAPHIC ELEMENT.svg"
