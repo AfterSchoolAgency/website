@@ -127,10 +127,26 @@ export default function UnrollMenu() {
         </div>
 
         {/* Menu Items */}
-        <div className="flex items-center justify-center h-full">
-  <h1 className="text-6xl font-bold uppercase text-center leading-tight">
+        <div className="flex flex-col items-center justify-center h-full space-y-8 w-full">
+  {/* Title */}
+  <h1 className="max-w-3xl w-full text-center text-6xl font-bold uppercase leading-snug">
     After School is a creative collective
   </h1>
+  {/* Roles List */}
+  <nav className="mt-8 w-full">
+    <ul className="space-y-4 flex flex-col items-center">
+      {roles.map((role) => (
+        <li key={role}>
+          <button
+            onClick={() => setOpen(false)}
+            className="text-3xl font-semibold uppercase tracking-tight focus:outline-none hover:underline"
+          >
+            {role}
+          </button>
+        </li>
+      ))}
+    </ul>
+  </nav>
 </div>
       </div>
     </>
