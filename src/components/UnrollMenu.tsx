@@ -127,21 +127,11 @@ export default function UnrollMenu() {
         </div>
 
         {/* Menu Items */}
-        <nav className="mt-32 ml-12">
-          <ul className="space-y-6">
-            {roles.map((role, i) => (
-              <li key={role}>
-                <button
-                  ref={(el) => { if (el) itemsRef.current[i] = el }}
-                  onClick={() => setOpen(false)}
-                  className="text-4xl font-bold uppercase tracking-tight text-black hover:text-gray-800 transition-colors focus:outline-none"
-                >
-                  {role}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <div className="flex items-center justify-center h-full">
+  <h1 className="text-6xl font-bold uppercase text-center leading-tight">
+    After School is a creative collective
+  </h1>
+</div>
       </div>
     </>
   )
