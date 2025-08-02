@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-expressions */
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import gsap from 'gsap'
+import gsap, { Timeline } from 'gsap'
 import Image from 'next/image'
 
 const roles = [
@@ -23,8 +22,7 @@ export default function UnrollMenu() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
   const itemsRef = useRef<Array<HTMLButtonElement | null>>([])
-  // Use any to avoid Timeline vs Tween mismatch
-  const tl = useRef<any>(null)
+  const tl = useRef<Timeline | null>(null)
 
   useEffect(() => {
     const overlay = overlayRef.current
@@ -45,13 +43,11 @@ export default function UnrollMenu() {
     // Build timeline
     const timeline = gsap.timeline({ paused: true })
     timeline
-      // 1) Draw the path (unravel)
       .to(pathEl, {
         strokeDashoffset: 0,
         duration: 1,
         ease: 'power2.inOut',
       })
-      // 2) Expand overlay full-screen
       .to(
         overlay,
         {
@@ -63,7 +59,6 @@ export default function UnrollMenu() {
         },
         '-=0.3'
       )
-      // 3) Stagger menu items
       .from(
         itemsRef.current,
         {
@@ -82,7 +77,11 @@ export default function UnrollMenu() {
   // Play or reverse on open toggle
   useEffect(() => {
     if (tl.current) {
-      open ? tl.current.play() : tl.current.reverse()
+      if (open) {
+        tl.current.play()
+      } else {
+        tl.current.reverse()
+      }
     }
     document.body.style.overflow = open ? 'hidden' : ''
   }, [open])
