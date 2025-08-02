@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import gsap from 'gsap'
 import Image from 'next/image'
 
 const roles = [
@@ -18,61 +19,80 @@ const roles = [
 
 export default function UnrollMenu() {
   const [open, setOpen] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const itemsRef = useRef<Array<HTMLButtonElement | null>>([])
+  const tl = useRef<gsap.core.Tween | null>(null)
 
-  // Close menu when clicking outside
+  // Initialize GSAP timeline once
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    const overlay = overlayRef.current
+    if (!overlay) return
+
+    // Set initial state
+    gsap.set(overlay, { height: 0, overflow: 'hidden' })
+
+    // Create timeline
+    tl.current = gsap.timeline({ paused: true })
+      .to(overlay, {
+        height: '100vh',
+        duration: 0.8,
+        ease: 'cubic-bezier(0.23, 1, 0.32, 1)',
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(10px)',
+      })
+      .from(
+        itemsRef.current,
+        {
+          y: -20,
+          opacity: 0,
+          stagger: 0.1,
+          duration: 0.4,
+          ease: 'power3.out',
+        },
+        '-=0.4'
+      )
   }, [])
 
-  // Prevent background scroll when open
+  // Play or reverse on open change
   useEffect(() => {
+    if (tl.current) {
+      open ? tl.current.play() : tl.current.reverse()
+    }
+
+    // Prevent background scroll
     document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
   }, [open])
 
   return (
-    <div ref={containerRef}>
-      {/* Static trigger button */}
-      <button
-        className="fixed top-6 left-6 z-50 focus:outline-none"
-        onClick={() => setOpen(true)}
-        aria-label="Open menu"
-      >
-        <Image
-          src="/GRAPHIC ELEMENT.svg"
-          alt="Graphic Element"
-          width={200}
-          height={60}
-          priority
-        />
-      </button>
-
-      {/* Sliding overlay */}
-      <div
-        className="fixed inset-0 bg-white z-40 transform transition-transform duration-1000 ease-in-out"
-        style={{
-          transform: open ? 'translateX(0%)' : 'translateX(-100%)',
-          pointerEvents: open ? 'auto' : 'none',
-        }}
-      >
-        {/* Close button */}
+    <>
+      {/* Trigger: logo or close icon */}
+      <div className="fixed top-6 left-6 z-50">
         <button
-          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
-          onClick={() => setOpen(false)}
-          aria-label="Close menu"
+          onClick={() => setOpen(prev => !prev)}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          className="focus:outline-none"
         >
-          &times;
+          {open ? (
+            <span className="text-3xl font-bold">&times;</span>
+          ) : (
+            <Image
+              src="/GRAPHIC ELEMENT.svg"
+              alt="Graphic Element"
+              width={200}
+              height={60}
+              priority
+            />
+          )}
         </button>
+      </div>
 
+      {/* Animated overlay */}
+      <div
+        ref={overlayRef}
+        className="fixed inset-0 z-40 flex flex-col items-start px-6"
+      >
         {/* Logo in overlay header */}
-        <div className="absolute top-6 left-6">
+        <div className="mt-6">
           <Image
             src="/GRAPHIC ELEMENT.svg"
             alt="Graphic Element"
@@ -82,19 +102,20 @@ export default function UnrollMenu() {
           />
         </div>
 
-        {/* Centered menu items */}
-        <div className="h-full flex flex-col items-center justify-center space-y-8 px-4">
-          {roles.map(role => (
+        {/* Menu items */}
+        <div className="flex flex-col mt-12 space-y-6">
+          {roles.map((role, i) => (
             <button
               key={role}
+              ref={el => (itemsRef.current[i] = el)}
               onClick={() => setOpen(false)}
-              className="text-4xl font-semibold uppercase tracking-wide focus:outline-none"
+              className="text-3xl font-semibold uppercase tracking-wide focus:outline-none text-left"
             >
               {role}
             </button>
           ))}
         </div>
       </div>
-    </div>
+    </>
   )
 }
