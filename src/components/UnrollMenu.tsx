@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 
 const roles = [
@@ -21,7 +20,7 @@ export default function UnrollMenu() {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // close on outside click
+  // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -34,13 +33,17 @@ export default function UnrollMenu() {
 
   return (
     <div ref={containerRef} className="fixed top-6 left-6 z-50">
-      <button onClick={() => setOpen(o => !o)} aria-label="Toggle menu" className="focus:outline-none">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-label="Toggle menu"
+        className="focus:outline-none"
+      >
         {/* Unroll animation: reveal SVG left→right */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: open ? 1 : 0 }}
-          transition={{ duration: 1.6, ease: 'easeInOut' }}
-          style={{ originX: 0 }}
+        <div
+          className={
+            `overflow-hidden transition-transform duration-700 ease-in-out transform origin-left`
+          }
+          style={{ transform: open ? 'scaleX(1)' : 'scaleX(0)' }}
         >
           <Image
             src="/GRAPHIC ELEMENT.svg"
@@ -49,26 +52,21 @@ export default function UnrollMenu() {
             height={60}
             className="pointer-events-none"
           />
-        </motion.div>
+        </div>
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.ul
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            transition={{ delay: 1.6 }}
-            className="mt-2 ml-4 bg-white/90 backdrop-blur shadow-md rounded p-4 space-y-1 font-sans text-sm"
-          >
-            {roles.map(role => (
-              <li key={role} className="text-black">
-                {role}
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+      <ul
+        className={
+          `absolute top-full left-0 mt-2 ml-4 bg-white/90 backdrop-blur shadow-md rounded p-4 space-y-1 font-sans text-sm transition-opacity duration-500 ease-in-out ` +
+          (open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')
+        }
+      >
+        {roles.map(role => (
+          <li key={role} className="text-black">
+            {role}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
