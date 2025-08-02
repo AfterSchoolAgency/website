@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import gsap, { Timeline } from 'gsap'
+import gsap from 'gsap'
 import Image from 'next/image'
 
 const roles = [
@@ -23,8 +22,10 @@ export default function UnrollMenu() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
   const itemsRef = useRef<Array<HTMLButtonElement | null>>([])
-  const tl = useRef<Timeline | null>(null)
+  // Timeline for GSAP animation
+  const tl = useRef<ReturnType<typeof gsap.timeline> | null>(null)
 
+  // Build GSAP timeline once
   useEffect(() => {
     const overlay = overlayRef.current
     const pathEl = pathRef.current
@@ -38,17 +39,18 @@ export default function UnrollMenu() {
     pathEl.style.stroke = 'black'
     pathEl.style.strokeWidth = '2'
 
-    // Prevent initial overflow
+    // Initialize overlay hidden
     gsap.set(overlay, { height: 0, overflow: 'hidden' })
 
-    // Build timeline
+    // Create timeline
     const timeline = gsap.timeline({ paused: true })
-    timeline
+      // 1) Unravel SVG path
       .to(pathEl, {
         strokeDashoffset: 0,
         duration: 1,
         ease: 'power2.inOut',
       })
+      // 2) Expand overlay
       .to(
         overlay,
         {
@@ -60,6 +62,7 @@ export default function UnrollMenu() {
         },
         '-=0.3'
       )
+      // 3) Stagger menu items
       .from(
         itemsRef.current,
         {
@@ -75,26 +78,23 @@ export default function UnrollMenu() {
     tl.current = timeline
   }, [])
 
-  // Play or reverse on open toggle
+  // Play or reverse timeline on open
   useEffect(() => {
     if (tl.current) {
-      if (open) {
-        tl.current.play()
-      } else {
-        tl.current.reverse()
-      }
+      if (open) tl.current.play()
+      else tl.current.reverse()
     }
     document.body.style.overflow = open ? 'hidden' : ''
   }, [open])
 
   return (
     <>
-      {/* Trigger button */}
+      {/* Trigger in top-left */}
       <div className="fixed top-6 left-6 z-50">
         <button
           onClick={() => setOpen(prev => !prev)}
-          className="focus:outline-none"
           aria-label={open ? 'Close menu' : 'Open menu'}
+          className="focus:outline-none"
         >
           {open ? (
             <span className="text-3xl font-bold">×</span>
@@ -120,13 +120,13 @@ export default function UnrollMenu() {
         {/* Close button */}
         <button
           onClick={() => setOpen(false)}
-          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
           aria-label="Close menu"
+          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
         >
           ×
         </button>
 
-        {/* Logo in overlay header */}
+        {/* Logo inside overlay header */}
         <div className="absolute top-6 left-6">
           <Image
             src="/GRAPHIC ELEMENT.svg"
