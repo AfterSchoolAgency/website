@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import gsap from 'gsap'
+import Image from 'next/image'
 
 const roles = [
   'Curators',
@@ -21,7 +22,8 @@ export default function UnrollMenu() {
   const overlayRef = useRef<HTMLDivElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
   const itemsRef = useRef<Array<HTMLButtonElement | null>>([])
-  const tl = useRef<gsap.core.Timeline>()
+  // Use any to avoid Timeline vs Tween mismatch
+  const tl = useRef<any>(null)
 
   useEffect(() => {
     const overlay = overlayRef.current
@@ -41,6 +43,7 @@ export default function UnrollMenu() {
 
     // Build timeline
     const timeline = gsap.timeline({ paused: true })
+    timeline
       // 1) Draw the path (unravel)
       .to(pathEl, {
         strokeDashoffset: 0,
@@ -48,28 +51,38 @@ export default function UnrollMenu() {
         ease: 'power2.inOut',
       })
       // 2) Expand overlay full-screen
-      .to(overlay, {
-        height: '100vh',
-        duration: 0.8,
-        ease: 'cubic-bezier(0.23,1,0.32,1)',
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        backdropFilter: 'blur(10px)',
-      }, '-=0.3')
+      .to(
+        overlay,
+        {
+          height: '100vh',
+          duration: 0.8,
+          ease: 'cubic-bezier(0.23,1,0.32,1)',
+          backgroundColor: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(10px)',
+        },
+        '-=0.3'
+      )
       // 3) Stagger menu items
-      .from(itemsRef.current, {
-        y: -20,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.4,
-        ease: 'power3.out',
-      }, '-=0.4')
+      .from(
+        itemsRef.current,
+        {
+          y: -20,
+          opacity: 0,
+          stagger: 0.1,
+          duration: 0.4,
+          ease: 'power3.out',
+        },
+        '-=0.4'
+      )
 
     tl.current = timeline
   }, [])
 
   // Play or reverse on open toggle
   useEffect(() => {
-    if (tl.current) open ? tl.current.play() : tl.current.reverse()
+    if (tl.current) {
+      open ? tl.current.play() : tl.current.reverse()
+    }
     document.body.style.overflow = open ? 'hidden' : ''
   }, [open])
 
@@ -77,7 +90,11 @@ export default function UnrollMenu() {
     <>
       {/* Trigger button */}
       <div className="fixed top-6 left-6 z-50">
-        <button onClick={() => setOpen(prev => !prev)} className="focus:outline-none">
+        <button
+          onClick={() => setOpen(prev => !prev)}
+          className="focus:outline-none"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+        >
           {open ? (
             <span className="text-3xl font-bold">×</span>
           ) : (
@@ -99,24 +116,27 @@ export default function UnrollMenu() {
         ref={overlayRef}
         className="fixed inset-0 z-40 flex flex-col items-start px-6"
       >
+        {/* Close button */}
         <button
           onClick={() => setOpen(false)}
           className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
+          aria-label="Close menu"
         >
           ×
         </button>
 
+        {/* Logo in overlay header */}
         <div className="absolute top-6 left-6">
-  {/* Logo in overlay header as full-color image */}
-  <Image
-    src="/GRAPHIC ELEMENT.svg"
-    alt="Graphic Element"
-    width={200}
-    height={60}
-    priority
-  />
-</div>
+          <Image
+            src="/GRAPHIC ELEMENT.svg"
+            alt="Graphic Element"
+            width={200}
+            height={60}
+            priority
+          />
+        </div>
 
+        {/* Menu items */}
         <div className="flex flex-col mt-12 space-y-6">
           {roles.map((role, i) => (
             <button
