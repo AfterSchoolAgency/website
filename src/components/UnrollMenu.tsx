@@ -21,18 +21,20 @@ export default function UnrollMenu() {
   const [open, setOpen] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const itemsRef = useRef<Array<HTMLButtonElement | null>>([])
-  const tl = useRef<gsap.core.Tween | null>(null)
+  // Timeline ref should be gsap.core.Timeline, not Tween
+  const tl = useRef<gsap.core.Timeline | null>(null)
 
   // Initialize GSAP timeline once
   useEffect(() => {
     const overlay = overlayRef.current
     if (!overlay) return
 
-    // Set initial state
+    // Set initial overlay state
     gsap.set(overlay, { height: 0, overflow: 'hidden' })
 
-    // Create timeline
-    tl.current = gsap.timeline({ paused: true })
+    // Build timeline
+    const timeline = gsap.timeline({ paused: true })
+    timeline
       .to(overlay, {
         height: '100vh',
         duration: 0.8,
@@ -51,6 +53,8 @@ export default function UnrollMenu() {
         },
         '-=0.4'
       )
+
+    tl.current = timeline
   }, [])
 
   // Play or reverse on open change
