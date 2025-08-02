@@ -111,7 +111,7 @@ export default function UnrollMenu() {
           {roles.map((role, i) => (
             <button
               key={role}
-              ref={el => (itemsRef.current[i] = el)}
+              ref={el => { itemsRef.current[i] = el }}
               onClick={() => setOpen(false)}
               className="text-3xl font-semibold uppercase tracking-wide focus:outline-none text-left"
             >
