@@ -21,29 +21,26 @@ export default function UnrollMenu() {
   const [open, setOpen] = useState(false)
   const overlayRef = useRef<HTMLDivElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
-  const itemsRef = useRef<Array<HTMLButtonElement | null>>([])
-  const tl = useRef<ReturnType<typeof gsap.timeline> | null>(null)
+  const itemsRef = useRef<HTMLButtonElement[]>([])
+  const tl = useRef<ReturnType<typeof gsap.timeline>>(gsap.timeline({ paused: true }))
 
   useEffect(() => {
     const overlay = overlayRef.current
     const pathEl = pathRef.current
     if (!overlay || !pathEl) return
 
-    // Prepare SVG path
     const length = pathEl.getTotalLength()
-    pathEl.style.strokeDasharray = `${length}`
-    pathEl.style.strokeDashoffset = `${length}`
-    pathEl.style.fill = 'transparent'
-    pathEl.style.stroke = 'black'
-    pathEl.style.strokeWidth = '2'
-
+    gsap.set(pathEl, {
+      strokeDasharray: length,
+      strokeDashoffset: length,
+      fill: 'transparent',
+      stroke: '#000',
+      strokeWidth: 2,
+    })
     gsap.set(overlay, { height: 0, overflow: 'hidden' })
 
-    // Build animation timeline
-    const timeline = gsap.timeline({ paused: true })
-      // Unravel path
+    tl.current = gsap.timeline({ paused: true })
       .to(pathEl, { strokeDashoffset: 0, duration: 1, ease: 'power2.inOut' })
-      // Expand overlay
       .to(
         overlay,
         {
@@ -55,36 +52,23 @@ export default function UnrollMenu() {
         },
         '-=0.3'
       )
-      // Stagger menu items
-      .from(
-        itemsRef.current,
-        { y: -20, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power3.out' },
-        '-=0.4'
-      )
-
-    tl.current = timeline
+      .from(itemsRef.current, { y: -20, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power3.out' }, '-=0.4')
   }, [])
 
   useEffect(() => {
-    if (tl.current) {
-      open ? tl.current.play() : tl.current.reverse()
-    }
+    tl.current[open ? 'play' : 'reverse']()
     document.body.style.overflow = open ? 'hidden' : ''
   }, [open])
 
   return (
     <>
-      {/* Trigger Button */}
       <div className="fixed top-6 left-6 z-50">
-        <button
-          onClick={() => setOpen(prev => !prev)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          className="focus:outline-none"
-        >
+        <button onClick={() => setOpen(!open)} className="focus:outline-none" aria-label={open ? 'Close menu' : 'Open menu'}>
           {open ? (
-            <span className="text-3xl font-bold">×</span>
+            <span className="text-3xl font-bold">&times;</span>
           ) : (
             <svg
+              ref={null}
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 556 69"
               width="200"
@@ -99,44 +83,30 @@ export default function UnrollMenu() {
         </button>
       </div>
 
-      {/* Overlay */}
-      <div
-        ref={overlayRef}
-        className="fixed inset-0 z-40 flex flex-col items-start px-6"
-      >
-        {/* Close Button */}
-        <button
-          onClick={() => setOpen(false)}
-          aria-label="Close menu"
-          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
-        >
-          ×
+      <div ref={overlayRef} className="fixed inset-0 z-40 flex flex-col items-start px-6">
+        <button onClick={() => setOpen(false)} aria-label="Close menu" className="absolute top-6 right-6 text-3xl font-bold focus:outline-none">
+          &times;
         </button>
 
-        {/* Logo in Overlay */}
         <div className="absolute top-6 left-6">
-          <Image
-            src="/GRAPHIC ELEMENT.svg"
-            alt="Graphic Element"
-            width={200}
-            height={60}
-            priority
-          />
+          <Image src="/GRAPHIC ELEMENT.svg" alt="Graphic Element" width={200} height={60} priority />
         </div>
 
-        {/* Menu Items */}
-        <div className="flex flex-col mt-12 space-y-6">
-          {roles.map((role, i) => (
-            <button
-              key={role}
-              ref={el => { itemsRef.current[i] = el }}
-              onClick={() => setOpen(false)}
-              className="text-3xl font-semibold uppercase tracking-wide focus:outline-none text-left"
-            >
-              {role}
-            </button>
-          ))}
-        </div>
+        <nav className="mt-32 ml-12">
+  <ul className="space-y-6">
+    {roles.map((role, i) => (
+      <li key={role}>
+        <button
+          ref={(el) => el && (itemsRef.current[i] = el)}
+          onClick={() => setOpen(false)}
+          className="text-4xl font-bold uppercase tracking-tight focus:outline-none text-black hover:text-gray-800 transition-colors"
+        >
+          {role}
+        </button>
+      </li>
+    ))}
+  </ul>
+</nav>
       </div>
     </>
   )
