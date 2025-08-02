@@ -22,8 +22,8 @@ export default function UnrollMenu() {
 
   // Close menu when clicking outside
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setOpen(false)
       }
     }
@@ -31,42 +31,79 @@ export default function UnrollMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Prevent background scroll
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
   return (
-    <div ref={containerRef} className="fixed top-6 left-6 z-50">
-      <button
-        onClick={() => setOpen(o => !o)}
-        aria-label="Toggle menu"
-        className="focus:outline-none"
+    <div ref={containerRef}>
+      {/* Trigger button: unroll the graphic element */}
+      <div
+        className="fixed top-6 left-6 z-50 overflow-hidden origin-left"
+        style={{
+          transform: open ? 'scaleX(1)' : 'scaleX(0)',
+          transition: 'transform 1s ease-in-out',
+        }}
       >
-        {/* Unroll animation: reveal SVG left→right */}
-        <div
-          className={
-            `overflow-hidden transition-transform duration-700 ease-in-out transform origin-left`
-          }
-          style={{ transform: open ? 'scaleX(1)' : 'scaleX(0)' }}
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          className="focus:outline-none"
         >
           <Image
             src="/GRAPHIC ELEMENT.svg"
-            alt="Logo"
+            alt="Graphic Element"
             width={200}
             height={60}
-            className="pointer-events-none"
+            priority
+          />
+        </button>
+      </div>
+
+      {/* Full-screen overlay with unroll reveal */}
+      <div
+        className="fixed inset-0 bg-white z-40 origin-left"
+        style={{
+          transform: open ? 'scaleX(1)' : 'scaleX(0)',
+          transition: 'transform 1s ease-in-out',
+          pointerEvents: open ? 'auto' : 'none',
+        }}
+      >
+        {/* Close button */}
+        <button
+          onClick={() => setOpen(false)}
+          aria-label="Close menu"
+          className="absolute top-6 right-6 text-3xl font-bold focus:outline-none"
+        >
+          &times;
+        </button>
+
+        {/* Logo inside overlay */}
+        <div className="absolute top-6 left-6">
+          <Image
+            src="/GRAPHIC ELEMENT.svg"
+            alt="Graphic Element"
+            width={200}
+            height={60}
+            priority
           />
         </div>
-      </button>
 
-      <ul
-        className={
-          `absolute top-full left-0 mt-2 ml-4 bg-white/90 backdrop-blur shadow-md rounded p-4 space-y-1 font-sans text-sm transition-opacity duration-500 ease-in-out ` +
-          (open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none')
-        }
-      >
-        {roles.map(role => (
-          <li key={role} className="text-black">
-            {role}
-          </li>
-        ))}
-      </ul>
+        {/* Centered menu items */}
+        <div className="h-full flex flex-col items-center justify-center space-y-8 px-4">
+          {roles.map(role => (
+            <button
+              key={role}
+              onClick={() => setOpen(false)}
+              className="text-4xl font-semibold uppercase tracking-wide focus:outline-none"
+            >
+              {role}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
