@@ -93,7 +93,7 @@ export default function PoolScene({ showPool = true }) {
 
   // Play ambient kids audio when unmuted
   const handleUnmute = () => {
-    if (ambientAudioRef.current && !audioStarted) {
+    if (ambientAudioRef.current) {
       ambientAudioRef.current.loop = true;
       ambientAudioRef.current.currentTime = 0;
       ambientAudioRef.current.volume = 0.5;
@@ -284,8 +284,8 @@ export default function PoolScene({ showPool = true }) {
       floatyData.forEach((p1, i) => {
         if (p1.isAnimatingIn) return; // Skip physics for floaties still animating in
         // Ambient float
-        p1.vx += (Math.random() - 0.5) * 0.03; // Slightly increased for continuous motion
-        p1.vy += (Math.random() - 0.5) * 0.03; // Slightly increased for continuous motion
+        p1.vx += (Math.random() - 0.5) * 0.08; // Increased drift
+        p1.vy += (Math.random() - 0.5) * 0.08; // Increased drift
 
         // Add damping (friction)
         p1.vx *= 0.98; // Slightly increased friction for a calmer float
