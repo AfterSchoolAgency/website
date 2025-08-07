@@ -34,16 +34,15 @@ export default function Home() {
   }, []);
 
   return (
-    <main style={{ height: '100vh', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-      {/* InfoPanel is an absolute overlay within the main container */}
-      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
-        <ClientOnly>
-          <InfoPanel showIcon={showIcon} />
-        </ClientOnly>
-      </div>
-
-      {/* PoolScene is centered by the main flex container */}
+    <main style={{ height: '100vh', background: '#fff' }}>
+      {/* 
+        The components now handle their own positioning.
+        - PoolScene is absolutely centered in the viewport.
+        - InfoPanel uses fixed positioning internally.
+        This main container is just a simple wrapper.
+      */}
       <ClientOnly>
+        <InfoPanel showIcon={showIcon} />
         <PoolScene showPool={showPool} />
       </ClientOnly>
     </main>

@@ -348,7 +348,14 @@ export default function PoolScene({ showPool = true }) {
   }, [floaties]); // Rerun if floaties change
 
   return (
-    <div ref={sceneRef} style={{ position: "relative", width: 1100, height: 600 }}>
+    <div ref={sceneRef} style={{ 
+      position: "absolute", 
+      top: "50%", 
+      left: "50%", 
+      transform: "translate(-50%, -50%)", 
+      width: 1100, 
+      height: 600 
+    }}>
       {/* Logo in the center */}
       <div ref={logoRef} style={{ position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%, -50%)', zIndex: 2, opacity: 0, scale: 0.8 }}>
         <img src="/LOGO.svg" alt="A logo" style={{ 
