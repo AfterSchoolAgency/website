@@ -465,7 +465,7 @@ export default function PoolScene({ showPool = true }) {
 
           {/* Motion path for floaties */}
           </defs>
-          <path id="logoSlidePath" d={isMobile ? "M50,120 C100,120 150,280 200,450" : "M550,120 C600,120 650,280 700,450"} stroke="red" strokeWidth="2" fill="none"/>
+          <path id="logoSlidePath" d={isMobile ? "M200,120 C250,120 300,280 350,450" : "M550,120 C600,120 650,280 700,450"} stroke="red" strokeWidth="2" fill="none"/>
       </svg>
 
       {/* Contact Us text with watery effect */}
