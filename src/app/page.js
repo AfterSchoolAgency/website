@@ -1,23 +1,9 @@
 "use client";
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
 import PoolScene from '../components/PoolScene';
 import InfoPanel from '../components/InfoPanel';
 
-// Wrapper to prevent hydration errors by only rendering on the client
-const ClientOnly = ({ children }) => {
-  const [hasMounted, setHasMounted] = useState(false);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  if (!hasMounted) {
-    return null;
-  }
-
-  return children;
-};
+import React, { useEffect, useState } from 'react';
 
 export default function Home() {
   const [showPool, setShowPool] = useState(false);
@@ -34,17 +20,9 @@ export default function Home() {
   }, []);
 
   return (
-    <main style={{ height: '100vh', background: '#fff' }}>
-      {/* 
-        The components now handle their own positioning.
-        - PoolScene is absolutely centered in the viewport.
-        - InfoPanel uses fixed positioning internally.
-        This main container is just a simple wrapper.
-      */}
-      <ClientOnly>
-        <InfoPanel showIcon={showIcon} />
-        <PoolScene showPool={showPool} />
-      </ClientOnly>
+    <main style={{ minHeight: '100vh', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <InfoPanel showIcon={showIcon} />
+      <PoolScene showPool={showPool} />
     </main>
   );
 }

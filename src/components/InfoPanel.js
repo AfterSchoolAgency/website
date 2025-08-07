@@ -100,10 +100,10 @@ const InfoPanel = ({ showIcon = true }) => {
         <Image src="/info-icon.svg" alt="Info / Close" width={90} height={90} />
       </div>
 
-      <div style={panelStyle} className="info-panel" onClick={() => {
-          setIsOpen(false);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}>
+      <div style={panelStyle} className="info-panel" onClick={handleIconClick}>
+        
+
+            
         <h2 style={{
           position: 'absolute',
           top: '60px',
