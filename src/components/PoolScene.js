@@ -441,9 +441,16 @@ export default function PoolScene({ showPool = true }) {
             </div>
           </div>
         </div>
+        {/* Invisible SVG for motion paths is now INSIDE the scaled container */}
+        <svg width="0" height="0" style={{ position: 'absolute' }}>
+          <defs>
+            {/* Motion path for floaties */}
+            <path id="logoSlidePath" d="M550,120 C550,250 650,280 700,450" stroke="none" fill="none"/>
+          </defs>
+        </svg>
       </div>
 
-      {/* Invisible SVG for motion paths and filters */}
+      {/* Invisible SVG for filters */}
       <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
           {/* Watery/Gooey effect filter */}
@@ -452,9 +459,6 @@ export default function PoolScene({ showPool = true }) {
             <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
             <feBlend in="SourceGraphic" in2="goo" />
           </filter>
-
-          {/* Motion path for floaties */}
-          <path id="logoSlidePath" d="M550,120 C550,250 650,280 700,450" stroke="none" fill="none"/>
         </defs>
       </svg>
 

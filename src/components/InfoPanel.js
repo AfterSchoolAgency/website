@@ -26,17 +26,6 @@ const InfoPanel = ({ showIcon = true }) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Open info panel if user clicks anywhere on the page (not icon or panel)
-  useEffect(() => {
-    const onPageClick = (e) => {
-      if (isOpen) return;
-      // Ignore clicks on icon or panel
-      if (e.target.closest('.info-icon, .info-panel')) return;
-      setIsOpen(true);
-    };
-    document.addEventListener('click', onPageClick);
-    return () => document.removeEventListener('click', onPageClick);
-  }, [isOpen]);
 
 
   const baseIconStyle = {
