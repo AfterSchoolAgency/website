@@ -34,18 +34,18 @@ export default function Home() {
   }, []);
 
   return (
-    <main style={{ minHeight: '100vh', background: '#fff' }}>
-      {/* InfoPanel is a pure overlay and should not affect layout */}
-      <ClientOnly>
-        <InfoPanel showIcon={showIcon} />
-      </ClientOnly>
-
-      {/* Main container to center the PoolScene */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+    <main style={{ height: '100vh', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+      {/* InfoPanel is an absolute overlay within the main container */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
         <ClientOnly>
-          <PoolScene showPool={showPool} />
+          <InfoPanel showIcon={showIcon} />
         </ClientOnly>
       </div>
+
+      {/* PoolScene is centered by the main flex container */}
+      <ClientOnly>
+        <PoolScene showPool={showPool} />
+      </ClientOnly>
     </main>
   );
 }
