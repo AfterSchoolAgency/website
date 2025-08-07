@@ -454,7 +454,7 @@ export default function PoolScene({ showPool = true }) {
       </div>
 
       {/* Invisible SVG for motion paths and filters */}
-      <svg width="1100" height="600" style={{ position: 'absolute', top: 0, left: 0, zIndex: 9999, pointerEvents: 'none' }}>
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
         <defs>
           {/* Watery/Gooey effect filter */}
           <filter id="watery-goo">
@@ -464,8 +464,8 @@ export default function PoolScene({ showPool = true }) {
           </filter>
 
           {/* Motion path for floaties */}
-          </defs>
-          <path id="logoSlidePath" d={isMobile ? "M200,120 C250,120 300,280 350,450" : "M550,120 C600,120 650,280 700,450"} stroke="red" strokeWidth="2" fill="none"/>
+          <path id="logoSlidePath" d={isMobile ? "M200,120 C250,120 300,280 350,450" : "M550,120 C600,120 650,280 700,450"} stroke="none" fill="none"/>
+        </defs>
       </svg>
 
       {/* Contact Us text with watery effect */}
