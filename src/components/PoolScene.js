@@ -20,22 +20,7 @@ const FLOATY_LETTERS = [
   "A", "F", "T", "E", "R", "S", "C", "H", "O", "O", "L"
 ];
 
-const KID_SILHOUETTES = ['/kid-1.svg', '/kid-2.svg', '/kid-3.svg'];
 
-// Data for the 11 kids and the letters they carry
-const KID_DATA = [
-  { id: 'kid1', letters: ['A'], size: 20 },
-  { id: 'kid2', letters: ['F'], size: 20 },
-  { id: 'kid3', letters: ['T'], size: 20 },
-  { id: 'kid4', letters: ['E'], size: 20 },
-  { id: 'kid5', letters: ['R'], size: 20 },
-  { id: 'kid6', letters: ['S'], size: 20 },
-  { id: 'kid7', letters: ['C'], size: 20 },
-  { id: 'kid8', letters: ['H'], size: 20 },
-  { id: 'kid9', letters: ['O'], size: 20 },
-  { id: 'kid10', letters: ['O'], size: 20 },
-  { id: 'kid11', letters: ['L'], size: 20 },
-];
 
 // Final positions for floaties, relative to the pool container
 const FLOATY_FINAL_POSITIONS = [
@@ -52,11 +37,6 @@ const FLOATY_FINAL_POSITIONS = [
   { x: 660, y: 155, rotation: -10 }, // L (Moved closer)
 ];
 
-// A simple floaty component for now
-function Kid({ id, svg }) {
-  // Renders the kid silhouette SVG
-  return <img id={id} src={svg} alt="A kid silhouette" style={{ width: '70px', height: 'auto' }} />;
-}
 
 // A simple floaty component for now
 function Floaty({ letter, id, carried = false, onPush }) {
@@ -67,9 +47,8 @@ function Floaty({ letter, id, carried = false, onPush }) {
     onPush(id, x, y);
   };
 
-  const style = carried ? 
-    { position: 'absolute', opacity: 1, transform: 'scale(0.6)' } : 
-    { position: 'absolute', opacity: 0, visibility: 'hidden', display: 'none' };
+    // Always visible floaties
+  const style = { position: 'absolute', opacity: 1, transform: 'scale(0.6)' };
 
   return (
     <div id={id} style={style} className="floaty-wrapper" onMouseMove={handleMouseMove}>
@@ -86,125 +65,150 @@ function Floaty({ letter, id, carried = false, onPush }) {
 
 }
 
-export default function PoolScene() {
+export default function PoolScene({ showPool = true }) {
+  const ambientAudioRef = useRef(null);
+  const [showUnmute, setShowUnmute] = useState(false);
+  const [audioStarted, setAudioStarted] = useState(false);
   const sceneRef = useRef(null);
-  const [kidDataWithSvgs, setKidDataWithSvgs] = useState([]);
+  const logoRef = useRef(null);
+
+  // Try to auto-play ambient audio on pool show
+  useEffect(() => {
+    if (showPool && !audioStarted && ambientAudioRef.current) {
+      ambientAudioRef.current.loop = true;
+      ambientAudioRef.current.currentTime = 0;
+      ambientAudioRef.current.volume = 0.5;
+      ambientAudioRef.current.play()
+        .then(() => {
+          setAudioStarted(true);
+          setShowUnmute(false);
+        })
+        .catch(() => {
+          // Only show unmute if play() is blocked by browser
+          setShowUnmute(true);
+        });
+    }
+  }, [showPool, audioStarted]);
+
+  // Play ambient kids audio when unmuted
+  const handleUnmute = () => {
+    if (ambientAudioRef.current) {
+      ambientAudioRef.current.loop = true;
+      ambientAudioRef.current.currentTime = 0;
+      ambientAudioRef.current.volume = 0.5;
+      ambientAudioRef.current.play()
+        .then(() => {
+          setAudioStarted(true);
+          setShowUnmute(false);
+        });
+    }
+  };
+
+
+  // Set up floaty state (one for each letter)
+  const [floaties, setFloaties] = useState(FLOATY_LETTERS.map((letter, i) => ({
+    id: `floaty-${i}`,
+    letter: letter,
+    svg: ''
+  })));
+
   const [pushHandler, setPushHandler] = useState(() => () => {});
   const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 }); // Initialize mouse off-screen
 
+
+  // Logo animation on mount
   useEffect(() => {
-    // Assign random SVGs on the client-side only to prevent hydration mismatch
-    setKidDataWithSvgs(
-      KID_DATA.map(kid => ({
-        ...kid,
-        svg: KID_SILHOUETTES[Math.floor(Math.random() * KID_SILHOUETTES.length)],
-      }))
-    );
-  }, []); // Empty dependency array ensures this runs only once on the client
+    if (logoRef.current) {
+      gsap.fromTo(
+        logoRef.current,
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 1, ease: 'power2.out' }
+      );
+    }
+  }, []);
+
+  // No need to assign random SVGs. Only floaties are used.
 
   useEffect(() => {
-    if (kidDataWithSvgs.length === 0) return; // Don't run animations until kids are set
+    const floatyElements = gsap.utils.toArray('.floaty-wrapper');
+    if (floatyElements.length === 0) return;
 
-    console.log("Scene ready for new animation sequence.");
+    const tl = gsap.timeline();
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        console.log("Main animation sequence complete. Ready for end state.");
-        // TODO: Add logic here to fade in the final wordmark and navigation.
-      }
-    });
-
-    // 1. Pool emerges
-    // 1. Pool emerges, starting at the 2-second mark.
+    // 1. Animate pool fade-in
     tl.fromTo('.pool-container',
       { opacity: 0 },
-      { opacity: 1, duration: 1.5, ease: 'power1.inOut', delay: 2 }
+      { opacity: 1, duration: 1.5, ease: 'power1.inOut' },
+      0
     );
 
-    // Add a label to mark when the kids' parade should start
-    tl.addLabel('kidsParadeStarts', '+=0.5'); // 0.5s pause after pool appears
+        // Delay floaties entry by 1s
+    tl.to({}, { duration: 1 });
 
-    // Set kids at the start of the path, but hidden.
-    gsap.set('.kid-group', { 
-      opacity: 0, // Start hidden
-      rotation: 0 
-    });
 
-    // Create a separate timeline for each kid's journey
-    kidDataWithSvgs.forEach((kid, index) => {
-      const kidSelector = `#${kid.id}`;
-      const kidTl = gsap.timeline();
 
-      // This timeline handles a single kid's full journey
-      kidTl.to(kidSelector, { // Run up
-        motionPath: {
-          path: '#runUpPath',
-          align: '#runUpPath',
-          alignOrigin: [0.5, 0.5],
-          autoRotate: false,
-        },
-        duration: 8,
-        ease: 'power1.inOut',
-        onStart: () => gsap.set(kidSelector, { opacity: 1 }),
-      })
-      .to(kidSelector, { duration: 0.5 }) // Hesitate
-      .to(kidSelector, { // Slide down
-        motionPath: {
-          path: '#slideDownPath',
-          align: '#slideDownPath',
-          alignOrigin: [0.5, 0.5],
-          autoRotate: false,
-        },
-        duration: 2,
-        ease: 'power1.in',
-        onComplete: () => {
-          gsap.to(kidSelector, { opacity: 0, duration: 0.2 });
-          const floatyId = `floaty-${index}`;
-          // The floatyElement is now inside the pool container
-          const floatyElement = sceneRef.current.querySelector(`.pool-container #${floatyId}`);
-          if (floatyElement) {
-            const finalPos = FLOATY_FINAL_POSITIONS[index];
-            gsap.timeline()
-              .set(floatyElement, { 
-                opacity: 1, 
-                visibility: 'visible', 
-                display: 'block', 
-                x: finalPos.x, 
-                y: finalPos.y - 50, 
-                scale: 0.6, 
-                rotation: finalPos.rotation 
-              })
-              .to(floatyElement, { 
-                x: finalPos.x + (Math.random() * 40 - 20),
-                y: finalPos.y - (Math.random() * 20 + 20),
-                duration: 1.5, 
-                ease: 'power1.out',
-              })
-              .to(floatyElement, { 
-                x: finalPos.x,
-                y: finalPos.y, 
-                duration: 0.8, 
-                ease: 'bounce.out', 
-                onComplete: () => {
-                  gsap.to(floatyElement, { y: `+=${Math.random() * 10 + 5}`, repeat: -1, yoyo: true, duration: Math.random() * 2 + 3, ease: 'sine.inOut' });
-                }
-              });
+    // 2. Animate floaties rolling down the logo and into position, one by one.
+    floatyElements.forEach((el, i) => {
+      const finalPos = FLOATY_FINAL_POSITIONS[i];
+      tl.fromTo(el, 
+        {
+          // FROM: Start invisible at the top of the path
+          opacity: 0,
+          motionPath: {
+            path: '#logoSlidePath',
+            align: '#logoSlidePath',
+            alignOrigin: [0.5, 0.5],
+            start: 0,
+            end: 0
           }
-        }
-      });
+        },
+        {
+          // TO: Animate to visible and roll down the path
+          opacity: 1,
+          motionPath: {
+            path: '#logoSlidePath',
+            align: '#logoSlidePath',
+            alignOrigin: [0.5, 0.5],
+            autoRotate: false
+          },
+          rotation: '+=360',
+          duration: 1.5, // Even slower, more deliberate roll
+          ease: 'sine.inOut'
+        },
+        ">-1.45" // Maintain 0.05s delay with the new, slower duration
+      )
+      .to(el, {
+        x: finalPos.x,
+        y: finalPos.y,
+        rotation: finalPos.rotation,
+        duration: 0.8,
+        ease: 'power2.out',
+        onComplete: () => {
+            // Make watermark 9% more visible
+            gsap.to('.contact-watermark', { opacity: '+=0.09', duration: 0.5, ease: 'power1.inOut' });
 
-      // Add each kid's personal timeline to the main timeline, staggered
-      tl.add(kidTl, `kidsParadeStarts+=${index * 0.2}`);
+
+
+            // Hand over to physics engine with a 'splash' of momentum
+            if (floatyData[i]) {
+              floatyData[i].x = finalPos.x;
+              floatyData[i].y = finalPos.y;
+              floatyData[i].vx = (Math.random() - 0.5) * 1; // Softer splash velocity X
+              floatyData[i].vy = (Math.random() - 0.5) * 1; // Softer splash velocity Y
+              floatyData[i].isAnimatingIn = false; // Enable physics for this floaty
+            }
+          }
+      });
     });
 
-    const floatyElements = gsap.utils.toArray('.floaty-wrapper');
     const floatyData = floatyElements.map((el, i) => ({
       el,
-      x: FLOATY_FINAL_POSITIONS[i].x,
-      y: FLOATY_FINAL_POSITIONS[i].y,
+      x: 0, // Start at (0,0) relative to parent
+      y: 0,
       vx: 0,
       vy: 0,
-      radius: 25
+      radius: 25,
+      isAnimatingIn: true // Disable physics during entrance
     }));
 
     const poolPathElement = sceneRef.current.querySelector('#pool-path');
@@ -237,8 +241,14 @@ export default function PoolScene() {
       const pushRadius = 100; // The "ripple" radius around the mouse
       const pushStrength = 1.5;
       floatyData.forEach((p1, i) => {
+        if (p1.isAnimatingIn) return; // Skip physics for floaties still animating in
         // Ambient float
-        p1.vx += (Math.random() - 0.5) * 0.05;
+        p1.vx += (Math.random() - 0.5) * 0.03; // Slightly increased for continuous motion
+        p1.vy += (Math.random() - 0.5) * 0.03; // Slightly increased for continuous motion
+
+        // Add damping (friction)
+        p1.vx *= 0.98; // Slightly increased friction for a calmer float
+        p1.vy *= 0.98; // Slightly increased friction for a calmer float
 
         // Mouse interaction (wide push)
         const dxMouse = p1.x - mousePos.x;
@@ -295,7 +305,15 @@ export default function PoolScene() {
           }
         }
 
-        // Inter-floaty collisions
+        // Add a spring force to pull floaties back to their target position
+        const finalPos = FLOATY_FINAL_POSITIONS[i];
+        const springStrength = 0.0005;
+        const dxSpring = finalPos.x - p1.x;
+        const dySpring = finalPos.y - p1.y;
+        p1.vx += dxSpring * springStrength;
+        p1.vy += dySpring * springStrength;
+
+        // Collisions between floaties
         for (let j = i + 1; j < floatyData.length; j++) {
           const p2 = floatyData[j];
           const dx = p2.x - p1.x;
@@ -307,8 +325,8 @@ export default function PoolScene() {
             const angle = Math.atan2(dy, dx);
             const tx = p1.x + Math.cos(angle) * min_dist;
             const ty = p1.y + Math.sin(angle) * min_dist;
-            const ax = (tx - p2.x) * 0.5;
-            const ay = (ty - p2.y) * 0.5;
+            const ax = (tx - p2.x) * 0.1; // Reduced collision force
+            const ay = (ty - p2.y) * 0.1; // Reduced collision force
 
             p1.vx -= ax;
             p1.vy -= ay;
@@ -324,54 +342,115 @@ export default function PoolScene() {
     gsap.ticker.add(physicsTick);
 
     return () => {
-      tl.kill();
       gsap.ticker.remove(physicsTick);
+      tl.kill();
     };
-  }, [kidDataWithSvgs]); // Rerun if kid data changes
+  }, [floaties]); // Rerun if floaties change
 
   return (
-    <div ref={sceneRef} style={{ position: "relative", width: 1100, height: 600, border: '1px solid #ccc' }}>
-      {/* 'A' is positioned centrally */}
-      <div style={{ position: "absolute", left: '50%', top: '40%', transform: 'translate(-50%, -50%)', zIndex: 2 }}>
-        <img src="/LOGO.svg" alt="A logo" style={{ width: '300px', height: 'auto' }} />
+    <div ref={sceneRef} style={{ position: "relative", width: 1100, height: 600 }}>
+      {/* Logo in the center */}
+      <div ref={logoRef} style={{ position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%, -50%)', zIndex: 2, opacity: 0, scale: 0.8 }}>
+        <img src="/LOGO.svg" alt="A logo" style={{ 
+            width: '300px', 
+            height: 'auto', 
+        }} />
       </div>
       
       <div 
-        className="pool-container" 
-        style={{ position: 'absolute', bottom: '20px', left: '75%', transform: 'translateX(-50%) rotate(-5deg)', zIndex: 10 }}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+        className="pool-fade-wrapper"
+        style={{
+          opacity: showPool ? 1 : 0,
+          transition: 'opacity 2s ease-in-out',
+          pointerEvents: showPool ? 'auto' : 'none',
+          position: 'absolute',
+          bottom: '20px',
+          left: '75%',
+          transform: 'translateX(-50%) rotate(-5deg)',
+          zIndex: 10
         }}
-        onMouseLeave={() => setMousePos({ x: -1000, y: -1000 })}
       >
-        <div style={{ position: 'relative', width: '1000px', height: '300px' }}>
-          {POOL_SVG}
-          {/* Floaty letters are now positioned relative to THIS container */}
-          <div className="floaties-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
-            {kidDataWithSvgs.map((kid, index) => (
-              <Floaty key={`floaty-${index}`} id={`floaty-${index}`} letter={kid.letters[0]} onPush={pushHandler} />
-            ))}
+        <div 
+          className="pool-container" 
+          style={{ width: '1000px', height: '300px', position: 'relative' }}
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+          }}
+          onMouseLeave={() => setMousePos({ x: -1000, y: -1000 })}
+        >
+          <div style={{ position: 'relative', width: '1000px', height: '300px' }}>
+            {POOL_SVG}
+            {/* Floaty letters are now positioned relative to THIS container */}
+            <div className="floaties-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }}>
+              {floaties.map((floaty, index) => (
+                <Floaty key={floaty.id} id={floaty.id} letter={floaty.letter} onPush={pushHandler} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Placeholder for kids that will be animated */}
-      <div className="kids-container" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 4 }}>
-        {kidDataWithSvgs.map((kid, index) => (
-          <div key={kid.id} id={kid.id} className="kid-group" style={{ position: 'absolute', top: 0, left: 0, opacity: 0 }}>
-            <div className="kid-silhouette" style={{ position: 'absolute' }}>
-              <Kid id={`kid-${index}`} svg={kid.svg} />
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Invisible SVG for motion paths and filters */}
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <defs>
+          {/* Watery/Gooey effect filter */}
+          <filter id="watery-goo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
+            <feBlend in="SourceGraphic" in2="goo" />
+          </filter>
 
-      {/* Invisible SVG for the scene-wide motion path */}
-      <svg width="1100" height="600" style={{ position: 'absolute', top: 0, left: 0, zIndex: 5, pointerEvents: 'none' }}>
-                <path id="runUpPath" d="M1200,550 C800,600 300,600 150,550 C200,450 450,250 550,200" stroke="none" strokeWidth="2" fill="none"/>
-        <path id="slideDownPath" d="M550,200 Q550,350 700,450" stroke="none" strokeWidth="2" fill="none"/>
+          {/* Motion path for floaties */}
+          <path id="logoSlidePath" d="M550,120 C550,250 650,280 700,450" stroke="none" fill="none"/>
+        </defs>
       </svg>
+
+      {/* Contact Us text with watery effect */}
+      <div className="contact-watermark" style={{
+        position: 'absolute',
+        bottom: '-132px', // Raised by 0.25 inch (24px)
+        left: '89%', // Move further right
+        transform: 'translateX(-50%) rotate(-15deg)', // Increased angle
+        zIndex: 20,
+        opacity: 0
+      }}>
+        <a href="mailto:contact@afterschoolagency.com" style={{ display: 'inline-block', pointerEvents: 'auto' }}>
+          <img 
+            src="/assets/DC89A5B2-630A-4197-A665-AAFFF2D61C52.PNG" 
+            alt="Contact Us Watermark" 
+            style={{ width: '232px', height: 'auto', display: 'block', pointerEvents: 'auto', userSelect: 'none' }}
+          />
+        </a>
+      </div>
+      {/* Unmute button */}
+
+      {/* Unmute button */}
+      {showUnmute && (
+        <button
+          onClick={handleUnmute}
+          style={{
+            position: 'absolute',
+            top: 24,
+            right: 32,
+            zIndex: 1000,
+            background: 'rgba(255,255,255,0.95)',
+            color: '#111',
+            border: '1px solid #ccc',
+            borderRadius: '32px',
+            padding: '12px 24px',
+            fontSize: '1.2em',
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.07)',
+            transition: 'background 0.2s',
+          }}
+        >
+          Unmute
+        </button>
+      )}
+      {/* Ambient kids audio */}
+      <audio ref={ambientAudioRef} src="/assets/audio/11L-ambiant_kids_playing-1754548399070.mp3" preload="auto" />
     </div>
   );
 }
