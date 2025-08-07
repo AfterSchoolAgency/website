@@ -1,0 +1,24 @@
+.pool-scene-wrapper {
+  width: 100%;
+  max-width: 1100px; /* Base width of the scene */
+  margin: 0 auto;
+  position: relative;
+  /* Maintain a 1100:600 aspect ratio */
+  padding-top: 54.54%; /* (600 / 1100) * 100% */
+}
+
+.pool-scene-scaler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1100px;
+  height: 600px;
+  transform-origin: top left;
+}
+
+/* Scale the scene down on smaller screens */
+@media (max-width: 1100px) {
+  .pool-scene-scaler {
+    transform: scale(calc(100vw / 1100));
+  }
+}

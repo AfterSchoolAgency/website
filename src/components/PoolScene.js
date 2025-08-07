@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
+import './PoolScene.css'; // Import the CSS for responsive scaling
 
 import { gsap } from "gsap";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
@@ -365,7 +366,8 @@ export default function PoolScene({ showPool = true }) {
   }, [floaties]); // Rerun if floaties change
 
   return (
-    <div ref={sceneRef} style={{ position: "relative", width: 1100, height: 600 }}>
+    <div className="pool-scene-wrapper">
+      <div ref={sceneRef} className="pool-scene-scaler">
       {/* Logo in the center */}
       <div ref={logoRef} style={{ position: 'absolute', left: '50%', top: '40%', transform: 'translate(-50%, -50%)', zIndex: 2, opacity: 0, scale: 0.8 }}>
         <img src="/LOGO.svg" alt="A logo" style={{ 
@@ -468,6 +470,7 @@ export default function PoolScene({ showPool = true }) {
       )}
       {/* Ambient kids audio */}
       <audio ref={ambientAudioRef} src="/assets/audio/11L-ambiant_kids_playing-1754548399070.mp3" preload="auto" />
+      </div>
     </div>
   );
 }
