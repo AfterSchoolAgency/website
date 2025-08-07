@@ -60,9 +60,22 @@ const InfoPanel = ({ showIcon = true }) => {
       </div>
 
       {showPanel && (
-        <div className={panelClasses} onClick={handleIconClick}>
+        <div className={panelClasses}>
+          {/* Backdrop for closing the panel */}
+          <div 
+            className="info-panel-backdrop"
+            onClick={handleIconClick}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: 0
+            }}
+          />
           <h2 className="info-panel-header">After School is a collective of creators</h2>
-          <div className="info-panel-content" onClick={(e) => e.stopPropagation()}>
+          <div className="info-panel-content">
             <div className="info-panel-list-container">
               <ul className="info-panel-list">
                 <li>Artists</li>
