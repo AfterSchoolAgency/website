@@ -92,7 +92,7 @@ export default function PoolScene({ showPool = true }) {
 
   // Play ambient kids audio when unmuted
   const handleUnmute = () => {
-    if (ambientAudioRef.current) {
+    if (ambientAudioRef.current && !audioStarted) {
       ambientAudioRef.current.loop = true;
       ambientAudioRef.current.currentTime = 0;
       ambientAudioRef.current.volume = 0.5;
@@ -103,6 +103,23 @@ export default function PoolScene({ showPool = true }) {
         });
     }
   };
+
+  // If unmute button is shown, make any click unmute the audio
+  useEffect(() => {
+    if (showUnmute) {
+      const handleAnyClickToUnmute = () => {
+        handleUnmute();
+      };
+
+      // Add a one-time listener to the window
+      window.addEventListener('click', handleAnyClickToUnmute, { once: true });
+
+      // Cleanup in case the component unmounts before the click
+      return () => {
+        window.removeEventListener('click', handleAnyClickToUnmute);
+      };
+    }
+  }, [showUnmute]);
 
 
   // Set up floaty state (one for each letter)
