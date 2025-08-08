@@ -128,7 +128,7 @@ const InfoPanel = ({ showIcon = true }) => {
               <li>Architects</li>
               <li>Writers</li>
               <li>Advertisers</li>
-              <li>Photography</li>
+              <li>Photographers</li>
               <li>Dreamers</li>
             </ul>
           </div>
